@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(PARA-DARS VERSION 1.0 LANGUAGES CXX)
+project(para-dars VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,16 +31,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 #copy shaders into build
 set(SHADERS_DIR "${CMAKE_SOURCE_DIR}/src/graphics/shaders")
-add_custom_command(TARGET PARA-DARS POST_BUILD
+add_custom_command(TARGET para-dars POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${SHADERS_DIR}"
-        "$<TARGET_FILE_DIR:PARA-DARS>/shaders"
+        "$<TARGET_FILE_DIR:para-dars>/shaders"
 )
 
 #copy assets into build
 set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets")
-add_custom_command(TARGET PARA-DARS POST_BUILD
+add_custom_command(TARGET para-dars POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${ASSETS_DIR}"
-    "$<TARGET_FILE_DIR:PARA-DARS>/assets"
+    "$<TARGET_FILE_DIR:para-dars>/assets"
 )
