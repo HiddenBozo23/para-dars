@@ -15,6 +15,8 @@ class InputManager {
 
         static glm::vec2 GetMousePosition();
         static glm::vec2 GetMouseDelta();
+        static glm::vec2 GetScrollDelta();
+        static void ResetScrollDelta();
 
         static bool IsKeyDown(int key);
         static bool IsKeyPressed(int key);
@@ -31,4 +33,7 @@ class InputManager {
 
         static glm::vec2 mousePos;
         static glm::vec2 prevMousePos;
+        static glm::vec2 scrollDelta;
+
+        static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 };

@@ -23,6 +23,7 @@ class InspectorPanel : public Panel {
             std::string name;
             std::function<bool(EntityID)> checkFunc;
             std::function<void(EntityID)> drawFunc;
+            std::function<void(EntityID)> removeFunc;
         };
         std::unordered_map<std::type_index, DrawData> componentDrawers;
 };
@@ -38,5 +39,6 @@ void InspectorPanel::RegisterDraw(const std::string& name, std::function<void(T&
         T& comp = *ptr;
         drawer(comp);
     };
+    data.removeFunc = [this](EntityID id) {scene->RemoveComponent<T>(id); };
     componentDrawers[std::type_index(typeid(T))] = data;
 }

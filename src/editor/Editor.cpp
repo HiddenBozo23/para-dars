@@ -1,9 +1,11 @@
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <iostream>
 
 #include "para-dars/editor/Editor.h"
 #include "para-dars/core/LogManager.h"
 #include "para-dars/core/AssetManager.h"
+#include "para-dars/core/FileDialogManager.h"
 #include "para-dars/editor/panels/ViewportPanel.h"
 #include "para-dars/editor/panels/HierarchyPanel.h"
 #include "para-dars/editor/panels/InspectorPanel.h"
@@ -22,12 +24,16 @@ Editor::Editor() {
     renderSystem = std::make_unique<RenderSystem>(currentScene.get(), SCR_WIDTH, SCR_HEIGHT);
     currentScene->RegisterSystem(hierarchySystem.get());
     currentScene->RegisterSystem(renderSystem.get());
+    
+    //std::cout << AssetManager::ReadFile("assets/scenes/TestScene.json") << std::endl;
+    currentScene->Deserialise(AssetManager::ReadFile("assets/scenes/TestScene.json"));
 
+    /*
     EntityID e = currentScene->CreateEntity();
     currentScene->AddComponent<HierarchyComponent>(e, std::make_shared<HierarchyComponent>());
     currentScene->AddComponent<TransformComponent>(e, std::make_shared<TransformComponent>());
-    currentScene->AddComponent<ModelComponent>(e, std::make_shared<ModelComponent>(AssetManager::LoadModel("assets/models/crate/Crate1.obj")));
-    currentScene->AddComponent<RenderComponent>(e, std::make_shared<RenderComponent>());
+    currentScene->AddComponent<ModelComponent>(e, std::make_shared<ModelComponent>("assets/models/crate/Crate1.obj"));
+    currentScene->AddComponent<RenderComponent>(e, std::make_shared<RenderComponent>());*/
 }
 
 void Editor::InitPanels() {
@@ -37,13 +43,7 @@ void Editor::InitPanels() {
     RegisterPanel(std::make_unique<ViewportPanel>(this, renderSystem.get()));
 }
 
-void Editor::SetScene(Scene scene) {
-
-}
-
 void Editor::OnImGuiRender() {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
@@ -52,15 +52,16 @@ void Editor::OnImGuiRender() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                    ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | 
+                    ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 
     ImGui::Begin("DockSpace", nullptr, window_flags);
     ImGui::PopStyleVar(2);
 
     ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
-    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f));
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
 
     static bool first_time = true;
     if (first_time) {
@@ -114,24 +115,47 @@ void Editor::RenderMainMenuBar() {
                 // Handle New
             }
             if (ImGui::MenuItem("Open")) {
-                // Handle Open
+                std::string filename = FileDialogManager::OpenFile();
+                std::cout << filename << std::endl;
+                //currentScene->Deserialise(AssetManager::ReadFile(filename));
+            }
+            if (ImGui::BeginMenu("Recent")) {
+                if (ImGui::MenuItem("file1.txt")) {}
+                if (ImGui::MenuItem("file2.txt")) {}
+                ImGui::EndMenu();
             }
             if (ImGui::MenuItem("Save")) {
-                // Handle Save
+                AssetManager::WriteFile("assets/scenes/TestScene.json", currentScene->Serialise());
             }
-            if (ImGui::MenuItem("Exit")) {
+            if (ImGui::MenuItem("Save As")) {
                 // Handle Exit
             }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Entity")) {
-            if (ImGui::MenuItem("Add")) {
-                // Handle New
+            if (ImGui::BeginMenu("Add")) {
+                if (ImGui::MenuItem("Empty")) {}
+                if (ImGui::MenuItem("Primative")) {}
+                if (ImGui::MenuItem("Light")) {}
+                if (ImGui::MenuItem("Camera")) {}
+                ImGui::EndMenu();
+            }
+            if (ImGui::MenuItem("Duplicate")) {
+                // duplicate
             }
             if (ImGui::MenuItem("Remove")) {
                 if (selectedEntity == INVALID_ENTITY)
                     LogManager::Log(LogType::Error, "ERROR: NO ENTITY SELECTED, CANNOT REMOVE");
             }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Component")) {
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Viewport")) {
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Help")) {
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

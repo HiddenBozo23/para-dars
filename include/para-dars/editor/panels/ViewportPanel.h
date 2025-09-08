@@ -28,11 +28,11 @@ class ViewportPanel : public Panel {
         Shader outlinePostShader;
         Shader idEncodingShader;
 
-        void CameraInput();
         void HandleResize(ImVec2 availableSize);
         void MainRender(ImVec2 availableSize, Scene* scene, EntityID selected, Camera camera, glm::mat4 view, glm::mat4 projection);
         void EncodeIDBuffer(Scene* scene, glm::mat4 view, glm::mat4 projection);
         void DrawImGuizmo(Scene* scene, EntityID selected, glm::mat4 view, glm::mat4 projection);
+        void CameraInput(Scene* scene, EntityID selected);
         void SelectionInput(ImVec2 availableSize);
 
         unsigned int selectionFramebuffer, selectionColorAttachment, selectionDepthAttachment;
@@ -40,7 +40,7 @@ class ViewportPanel : public Panel {
         float distance = 10.0f;
         float yaw = glm::radians(0.0f);
         float pitch = glm::radians(30.0f);
-        float orbitSpeed = 0.003f;
+        float orbitSpeed = 0.005f;
         float panSpeed = 0.004f;
         float zoomSpeed = 0.5f;
 

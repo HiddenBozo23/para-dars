@@ -25,12 +25,12 @@ void ViewportPanel::OnImGuiRender() {
     glm::mat4 view = glm::inverse(camera.transform.GetMatrix());
     glm::mat4 projection = camera.camera.GetProjectionMatrix(static_cast<float>(viewportWidth) / viewportHeight);
 
-    CameraInput();
     HandleResize(availableSize);
     MainRender(availableSize, scene, selected, camera, view, projection);
     EncodeIDBuffer(scene, view, projection);
     DrawImGuizmo(scene, selected, view, projection);
-    SelectionInput(availableSize);
+    CameraInput(scene, selected);
+    SelectionInput(availableSize);    
         
     ImGui::End();
 }
@@ -54,16 +54,6 @@ Camera ViewportPanel::GetCamera() {
     cam.camera.farPlane = 100.0f;
 
     return cam;
-}
-
-void ViewportPanel::CameraInput() {
-    if (InputManager::IsMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-        if (InputManager::IsKeyDown(GLFW_KEY_LEFT_ALT) && InputManager::IsKeyDown(GLFW_KEY_LEFT_SHIFT)) {
-            OnCameraPan(InputManager::GetMouseDelta());
-        } else if (InputManager::IsKeyDown(GLFW_KEY_LEFT_ALT)) {
-            OnCameraOrbit(InputManager::GetMouseDelta());
-        }
-    }
 }
 
 void ViewportPanel::HandleResize(ImVec2 availableSize) {
@@ -124,7 +114,7 @@ void ViewportPanel::EncodeIDBuffer(Scene* scene, glm::mat4 view, glm::mat4 proje
 }
 
 void ViewportPanel::DrawImGuizmo(Scene* scene, EntityID selected, glm::mat4 view, glm::mat4 projection) {
-    if (selected != INVALID_ENTITY) {
+    if (selected != INVALID_ENTITY && scene->HasComponent<TransformComponent>(selected)) {
         ImGuizmo::BeginFrame();
         ImGuizmo::SetOrthographic(false);
         ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
@@ -137,7 +127,7 @@ void ViewportPanel::DrawImGuizmo(Scene* scene, EntityID selected, glm::mat4 view
         ImGuizmo::Manipulate(
             glm::value_ptr(view),
             glm::value_ptr(projection),
-            ImGuizmo::TRANSLATE,
+            ImGuizmo::SCALE,
             ImGuizmo::WORLD,
             glm::value_ptr(model)
         );
@@ -147,8 +137,28 @@ void ViewportPanel::DrawImGuizmo(Scene* scene, EntityID selected, glm::mat4 view
     }
 }
 
+void ViewportPanel::CameraInput(Scene* scene, EntityID selected) {
+    if (ImGui::IsItemHovered() && InputManager::IsMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
+        if (InputManager::IsKeyDown(GLFW_KEY_LEFT_ALT) && InputManager::IsKeyDown(GLFW_KEY_LEFT_SHIFT)) {
+            OnCameraPan(InputManager::GetMouseDelta());
+        } else if (InputManager::IsKeyDown(GLFW_KEY_LEFT_ALT)) {
+            OnCameraOrbit(InputManager::GetMouseDelta());
+        }
+    }
+
+    if (ImGui::IsItemHovered()) {
+        glm::vec2 scroll = InputManager::GetScrollDelta();
+        if (scroll.y != 0.0f) 
+            OnCameraZoom(scroll.y);
+    }
+    InputManager::ResetScrollDelta();
+
+    if (InputManager::IsKeyPressed(GLFW_KEY_F) && selected != INVALID_ENTITY && scene->HasComponent<TransformComponent>(selected))
+        focalPoint = scene->GetComponent<TransformComponent>(selected)->position;
+}
+
 void ViewportPanel::SelectionInput(ImVec2 availableSize) {
-    if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+    if (ImGui::IsItemHovered() && InputManager::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) && !InputManager::IsKeyDown(GLFW_KEY_LEFT_ALT)) {
         ImVec2 mousePos = ImGui::GetMousePos();
         ImVec2 winPos   = ImGui::GetItemRectMin();
         ImVec2 localPos = ImVec2(mousePos.x - winPos.x, mousePos.y - winPos.y);

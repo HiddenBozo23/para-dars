@@ -7,6 +7,8 @@
 class AssetManager {
     public:
         static Model* LoadModel(const std::string& path);
+        static bool WriteFile(const std::string& path, const std::string& data);
+        static std::string ReadFile(const std::string& path);
 
     private:
         static std::unordered_map<std::string, std::shared_ptr<Model>> modelCache;

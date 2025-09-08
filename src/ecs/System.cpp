@@ -2,9 +2,7 @@
 #include "para-dars/core/LogManager.h"
 
 System::System(Scene* scene) 
-    : scene(scene) {
-    backupScene = std::make_unique<Scene>();
-}
+    : scene(scene) {}
 
 void System::OnComponentChanged(EntityID id) {
     // does the new id meet system requirements?
@@ -32,9 +30,13 @@ Scene* System::GetScene() {
     if (scene) return scene;
 
     LogManager::Log(LogType::Error, "ERROR: INVALID SCENE POINTER IN SYSTEM, USING DEFAULT EMPTY SCENE");
-    return backupScene.get();
+    return nullptr;
 }
 
 std::vector<EntityID> System::GetTrackedEntities() {
     return trackedEntities;
+}
+
+void System::ClearTrackedEntities() {
+    trackedEntities.clear();
 }

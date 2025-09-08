@@ -10,10 +10,12 @@ bool InputManager::prevKeys[GLFW_KEY_LAST + 1] = { false };
 
 glm::vec2 InputManager::mousePos(0.0f);
 glm::vec2 InputManager::prevMousePos(0.0f);
+glm::vec2 InputManager::scrollDelta(0.0f);
 
 
 void InputManager::Init(GLFWwindow* win) {
     window = win;
+    glfwSetScrollCallback(window, ScrollCallback);
 }
 
 void InputManager::Update() {
@@ -52,6 +54,14 @@ glm::vec2 InputManager::GetMouseDelta() {
     return mousePos - prevMousePos; 
 }
 
+glm::vec2 InputManager::GetScrollDelta() {
+    return scrollDelta;
+}
+
+void InputManager::ResetScrollDelta() {
+    scrollDelta = glm::vec2(0.0f);
+}
+
 bool InputManager::IsKeyDown(int key) { 
     return keys[key]; 
 }
@@ -62,4 +72,8 @@ bool InputManager::IsKeyPressed(int key) {
 
 bool InputManager::IsKeyReleased(int key) { 
     return !keys[key] && prevKeys[key]; 
+}
+
+void InputManager::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+    scrollDelta += glm::vec2((float)xoffset, (float)yoffset);
 }

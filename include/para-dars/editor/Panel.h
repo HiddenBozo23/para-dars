@@ -18,7 +18,6 @@ class Panel {
 
     private:
         Editor* editor;
-        std::unique_ptr<Editor> backupEditor;
 };
 
 #include "para-dars/editor/Editor.h"

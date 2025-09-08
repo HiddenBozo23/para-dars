@@ -19,6 +19,8 @@ find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(imguizmo CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(nfd CONFIG REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     glfw
@@ -27,6 +29,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     assimp::assimp
     imgui::imgui
     imguizmo::imguizmo
+    nlohmann_json::nlohmann_json
+    nfd::nfd
 )
 
 #copy shaders into build

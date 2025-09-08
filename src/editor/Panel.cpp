@@ -2,13 +2,11 @@
 #include "para-dars/core/LogManager.h"
 
 Panel::Panel(Editor* editor)
-    : editor(editor) {
-    backupEditor = std::make_unique<Editor>();
-}
+    : editor(editor) {}
 
 Editor* Panel::GetEditor() {
     if (editor) return editor;
 
-    LogManager::Log(LogType::Error, "ERROR: PANEL POINTER TO EDITOR IS NULL, USING DEFAULT EDITOR");
-    return backupEditor.get();
+    LogManager::Log(LogType::Error, "ERROR: PANEL POINTER TO EDITOR IS NULL");
+    return nullptr;
 }

@@ -1,6 +1,9 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <stb_image.h>
+#include <fstream>
+#include <sstream>
+#include <filesystem>
 
 #include "para-dars/core/AssetManager.h"
 #include "para-dars/core/LogManager.h"
@@ -22,6 +25,30 @@ Model* AssetManager::LoadModel(const std::string& path) {
     auto model = std::make_shared<Model>(meshEntries);
     modelCache[path] = model;
     return model.get();
+}
+
+bool AssetManager::WriteFile(const std::string& path, const std::string& data) {
+    std::ofstream file(path, std::ios::out | std::ios::trunc);
+    if (!file.is_open()) {
+        LogManager::Log(LogType::Error, "ERROR: FAILED TO OPEN FILE AT: " + path);
+        return false;
+    }
+    
+    file << data;
+    file.close();
+    return true;
+}
+
+std::string AssetManager::ReadFile(const std::string& path) {
+    std::ifstream file(path, std::ios::in);
+    if (!file.is_open()) {
+        LogManager::Log(LogType::Error, "ERROR: FAILED TO OPEN FILE AT: " + path);
+        return "";
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
 }
 
 void AssetManager::ProcessNode(aiNode* node, const aiScene* scene, const std::string& path, std::vector<MeshEntry>& meshEntries) {

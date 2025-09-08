@@ -1,4 +1,7 @@
 #include "para-dars/ecs/Scene.h"
+#include "para-dars/ecs/Serialisable.h"
+#include "para-dars/core/LogManager.h"
+#include "para-dars/ecs/ComponentFactory.h"
 
 EntityID Scene::CreateEntity() {
     EntityID id = EntityManager::CreateEntity();
@@ -48,5 +51,57 @@ void Scene::RegisterSystem(System* system) {
 void Scene::NotifyComponentChanged(EntityID id) {
     for (auto system : systems) {
         if (system) system->OnComponentChanged(id);
+    }
+}
+
+std::string Scene::Serialise() {
+    nlohmann::json sceneJ;
+    sceneJ["entities"] = nlohmann::json::array();
+
+    for (EntityID id : entities) {
+        nlohmann::json entityJ;
+        entityJ["id"] = id;
+        entityJ["components"] = nlohmann::json::array();
+
+        for (auto& [type, entityMap] : componentMap) {
+            auto it = entityMap.find(id);
+            if (it != entityMap.end()) {
+                Serialisable* serial = static_cast<Serialisable*>(it->second.get());
+                if (serial) {
+                    nlohmann::json compJ = nlohmann::json::parse(serial->Serialise());
+                    compJ["type"] = type.name();
+                    entityJ["components"].push_back(compJ);
+                }
+                else LogManager::Log(LogType::Error, "ERROR: FAILED TO SERIALISE COMPONENT: ID: " + std::to_string(id) + " COMPONENT: " + type.name());
+            }
+        }
+
+        sceneJ["entities"].push_back(entityJ);
+    }
+
+    return sceneJ.dump(4);
+}
+
+void Scene::Deserialise(const std::string& data) {
+    nlohmann::json sceneJ = nlohmann::json::parse(data);
+
+    entities.clear();
+    componentMap.clear();
+    for (auto system : systems) 
+        if (system) system->ClearTrackedEntities();
+
+    for (auto& entityJ : sceneJ["entities"]) {
+
+        EntityID id  = entityJ["id"];
+        entities.push_back(id);
+
+        for (auto& compJ : entityJ["components"]) {
+            std::string typeName = compJ["type"];
+            auto comp = ComponentFactory::Create(typeName);
+            if (comp) {
+                comp->Deserialise(compJ.dump());
+                AddComponent(std::type_index(typeid(*comp)), id, comp);
+            }
+        }
     }
 }

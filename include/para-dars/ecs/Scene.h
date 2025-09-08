@@ -6,8 +6,9 @@
 
 #include "para-dars/ecs/EntityManager.h"
 #include "para-dars/ecs/System.h"
+#include "para-dars/ecs/Serialisable.h"
 
-class Scene {
+class Scene : Serialisable {
     public:
         EntityID CreateEntity();
         void DestroyEntity(EntityID id);
@@ -28,6 +29,9 @@ class Scene {
 
         void RegisterSystem(System* system);
         void NotifyComponentChanged(EntityID id);
+
+        std::string Serialise() override;
+        void Deserialise(const std::string& data);
     
     private:
         std::vector<EntityID> entities;

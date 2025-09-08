@@ -20,6 +20,7 @@ class System {
         virtual void OnComponentAboutToBeRemoved(std::type_index type, EntityID id);
         virtual Scene* GetScene();
         virtual std::vector<EntityID> GetTrackedEntities();
+        virtual void ClearTrackedEntities();
 
     protected:
         std::vector<std::type_index> requiredComponents;
@@ -27,7 +28,6 @@ class System {
         
     private:
         Scene* scene;
-        std::unique_ptr<Scene> backupScene;
 };
 
 #include "para-dars/ecs/Scene.h"  // import properly

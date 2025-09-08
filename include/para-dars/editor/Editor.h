@@ -27,8 +27,6 @@ class Editor {
     private:
         void RenderMainMenuBar();
 
-        void SetScene(Scene scene);
-
         std::unique_ptr<HierarchySystem> hierarchySystem;
         std::unique_ptr<RenderSystem> renderSystem;
 

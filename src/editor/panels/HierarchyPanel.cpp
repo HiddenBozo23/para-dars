@@ -1,4 +1,5 @@
 #include <imgui.h>
+#include <iostream>
 
 #include "para-dars/editor/panels/HierarchyPanel.h"
 #include "para-dars/ecs/components/HierarchyComponent.h"
@@ -24,6 +25,7 @@ void HierarchyPanel::OnImGuiRender() {
     std::vector<EntityID> entities = hierarchySystem->GetTrackedEntities();
     for (EntityID entity : entities) {
         if (scene->GetComponent<HierarchyComponent>(entity)->parent == INVALID_ENTITY) 
+            //std::cout << entity << std::endl;
             DrawEntity(entity, scene, entities);
     }
 
